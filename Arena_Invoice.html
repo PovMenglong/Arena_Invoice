@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Invoice Template</title>
+    <!-- Google Fonts: Khmer OS Siemreap & Kantumruy Pro for superior Khmer typography + Plus Jakarta Sans for English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Khmer+OS+Siemreap:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Khmer OS Siemreap', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        /* Unified font size for perfect single-page fit */
+        .unified-text {
+            font-family: 'Plus Jakarta Sans', 'Khmer OS Siemreap', sans-serif;
+            font-size: 0.76rem !important;
+            line-height: 1.35 !important;
+        }
+
+        /* Optimized Item description input: full letter visibility, bold, compact padding to guarantee 1-page fit */
+        input.item-input {
+            font-family: 'Plus Jakarta Sans', 'Khmer OS Siemreap', sans-serif !important;
+            font-size: 0.8rem !important;
+            font-weight: 700 !important;
+            padding-top: 0.35rem !important;
+            padding-bottom: 0.35rem !important;
+            height: auto !important;
+            line-height: 1.4 !important;
+        }
+        
+        /* Hide native spinner arrows on inputs */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Fixed Address Textarea with proper height and padding */
+        textarea.fixed-2line-address {
+            min-height: 3.2rem !important;
+            height: 3.2rem !important;
+            resize: none !important;
+            overflow: hidden !important;
+            line-height: 1.35 !important;
+            font-size: 0.76rem !important;
+            padding-top: 0.3rem !important;
+            padding-bottom: 0.3rem !important;
+        }
+
+        /* PRINT STYLES - Guaranteed single A4 page layout with zero overflow */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 3mm;
+            }
+            html, body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .invoice-box {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                border-radius: 0 !important;
+                page-break-inside: avoid !important;
+            }
+            textarea, input, select {
+                border-color: transparent !important;
+                background: transparent !important;
+                resize: none !important;
+                box-shadow: none !important;
+                outline: none !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            .print-bordered-table, .print-bordered-table th, .print-bordered-table td {
+                border: 1px solid #cbd5e1 !important;
+            }
+            .bg-emerald-800, .bg-emerald-700, .bg-emerald-900\/60 {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .signature-section {
+                page-break-inside: avoid !important;
+            }
+            #sig-canvas {
+                display: none !important;
+            }
+            #sig-print-img {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen py-2 px-2 sm:px-6 lg:px-8 text-slate-800">
+
+    <!-- Top Action Bar (Hidden on Print) -->
+    <div class="max-w-4xl mx-auto mb-2 flex flex-wrap items-center justify-between gap-3 no-print bg-white p-2 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-2">
+            <i data-lucide="receipt" class="w-5 h-5 text-emerald-600"></i>
+            <h1 class="text-base font-bold text-slate-800">Invoice Generator</h1>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <!-- Currency Selector -->
+            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600">
+                <span>Currency:</span>
+                <select id="currency-select" onchange="changeCurrency(this.value)" class="bg-transparent font-bold text-emerald-700 focus:outline-none cursor-pointer">
+                    <option value="$">$ (USD)</option>
+                    <option value="៛">៛ (KHR)</option>
+                    <option value="₹">₹ (INR)</option>
+                    <option value="€">€ (EUR)</option>
+                    <option value="£">£ (GBP)</option>
+                </select>
+            </div>
+
+            <button onclick="addItem()" class="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold transition border border-emerald-200">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add Item
+            </button>
+            
+            <button onclick="triggerDirectPrint()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1 rounded-lg text-xs sm:text-sm font-semibold shadow-sm transition">
+                <i data-lucide="printer" class="w-4 h-4"></i> Print / Save PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Invoice Document (Compacted vertical heights to strictly guarantee 1-page print fit) -->
+    <div class="max-w-4xl mx-auto bg-white invoice-box rounded-2xl shadow-xl border border-slate-200 overflow-hidden my-2">
+        
+        <!-- Header Banner -->
+        <div class="bg-emerald-800 text-white px-4 py-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1" style="background-color: #065f46 !important; -webkit-print-color-adjust: exact;">
+            <div class="w-full sm:w-2/3">
+                <input type="text" value="ART ARENA ENTERTAINMENT" oninput="this.setAttribute('value', this.value)" class="bg-transparent text-sm sm:text-base font-black tracking-wide border-b border-transparent focus:outline-none w-full uppercase placeholder-emerald-300 text-white">
+                <input type="text" value="Professional • Automated • Easy to Use" oninput="this.setAttribute('value', this.value)" class="bg-transparent text-emerald-200 text-[10px] mt-[-2px] border-b border-transparent focus:outline-none w-full">
+            </div>
+            <div class="text-right bg-emerald-900/60 px-2.5 py-0.5 rounded-lg border border-emerald-700/50 self-end sm:self-auto" style="background-color: #044e3b !important; -webkit-print-color-adjust: exact;">
+                <span class="text-[8px] uppercase tracking-wider text-emerald-300 block font-semibold leading-tight">Document</span>
+                <span class="text-xs font-bold tracking-wide">INVOICE</span>
+            </div>
+        </div>
+
+        <!-- Details Section -->
+        <div class="p-3 sm:p-3.5 space-y-2">
+            
+            <!-- Company Info & Invoice Metadata -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pb-2 border-b border-slate-200">
+                <!-- Sender Address & Info -->
+                <div class="space-y-1">
+                    <textarea rows="2" oninput="syncTextarea(this)" class="fixed-2line-address unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2.5 py-0.5 font-medium focus:outline-none transition text-slate-800" placeholder="Enter Company Address">263 Claster Street, Boeung Chhouk, Nirot, Chba Ampov, Phnom Penh, Kingdom of Cambodia.</textarea>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <input type="text" value="Kingdom of Cambodia" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 font-medium text-slate-800 focus:outline-none transition">
+                        <input type="text" value="Phone: (855) 12-93-8989" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 font-medium text-slate-800 focus:outline-none transition">
+                    </div>
+                    <input type="text" value="Email: artarenaentertainment@gmail.com" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 font-medium text-slate-800 focus:outline-none transition">
+                </div>
+
+                <!-- Invoice Metadata -->
+                <div class="space-y-0.5 unified-text bg-slate-50/60 p-2 rounded-xl border border-slate-200">
+                    <div class="flex justify-between items-center px-2 py-0.5">
+                        <span class="font-semibold text-slate-600 text-[10.5px] uppercase tracking-wider">Invoice No.</span>
+                        <input type="text" value="INV-2026-1001" oninput="this.setAttribute('value', this.value)" class="unified-text bg-transparent text-right font-bold text-slate-900 focus:outline-none">
+                    </div>
+                    <div class="flex justify-between items-center px-2 py-0.5 border-t border-slate-200/60">
+                        <span class="font-semibold text-slate-600 text-[10.5px] uppercase tracking-wider">Invoice Date</span>
+                        <input type="date" value="2026-10-22" oninput="this.setAttribute('value', this.value)" class="unified-text bg-transparent text-right font-bold text-slate-900 focus:outline-none cursor-pointer">
+                    </div>
+                    <div class="flex justify-between items-center px-2 py-0.5 border-t border-slate-200/60">
+                        <span class="font-semibold text-slate-600 text-[10.5px] uppercase tracking-wider">Due Date</span>
+                        <input type="date" value="2026-11-05" oninput="this.setAttribute('value', this.value)" class="unified-text bg-transparent text-right font-bold text-slate-900 focus:outline-none cursor-pointer">
+                    </div>
+                    <div class="flex justify-between items-center px-2 py-0.5 border-t border-slate-200/60">
+                        <span class="font-semibold text-slate-600 text-[10.5px] uppercase tracking-wider">Customer ID</span>
+                        <input type="text" value="CUST-1001" oninput="this.setAttribute('value', this.value)" class="unified-text bg-transparent text-right font-bold text-slate-900 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill To & Ship To Boxes -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <!-- Bill To -->
+                <div class="border border-emerald-700 rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-emerald-700 text-white px-2.5 py-1 font-bold text-[10.5px] uppercase tracking-wider" style="background-color: #047857 !important; -webkit-print-color-adjust: exact;">BILL TO:</div>
+                    <div class="p-2 bg-slate-50/50 space-y-1 unified-text text-slate-800">
+                        <input type="text" value="Agricultural and Rural Development Bank (ARDB)" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white font-bold border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition">
+                        <textarea rows="2" oninput="syncTextarea(this)" class="fixed-2line-address unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition text-slate-800" placeholder="Street Address">អគារលេខ ៩-១៣ ផ្លូវលេខ ៧ ភូមិ១ សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ</textarea>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <input type="text" value="លោក គិត មេឃរិទ្ធ" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition font-semibold">
+                            <input type="text" value="Phone: (855) 12-807-088" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition">
+                        </div>
+                        <input type="text" value="ប្រធាននាយកដ្ឋានផ្នែកលក់ និងទីផ្សារនៃធនាគារ ARDB" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition text-slate-700">
+                    </div>
+                </div>
+
+                <!-- Ship To -->
+                <div class="border border-emerald-700 rounded-xl overflow-hidden shadow-sm">
+                    <div class="bg-emerald-700 text-white px-2.5 py-1 font-bold text-[10.5px] uppercase tracking-wider" style="background-color: #047857 !important; -webkit-print-color-adjust: exact;">SHIP TO:</div>
+                    <div class="p-2 bg-slate-50/50 space-y-1 unified-text text-slate-800">
+                        <input type="text" value="Agricultural and Rural Development Bank (ARDB)" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white font-bold border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition">
+                        <textarea rows="2" oninput="syncTextarea(this)" class="fixed-2line-address unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition text-slate-800" placeholder="Street Address">អគារលេខ ៩-១៣ ផ្លូវលេខ ៧ ភូមិ១ សង្កាត់ចតុមុខ ខណ្ឌដូនពេញ រាជធានីភ្នំពេញ</textarea>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <input type="text" value="លោក គិត មេឃរិទ្ធ" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition font-semibold">
+                            <input type="text" value="Phone: (855) 12-807-088" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-slate-50 hover:bg-slate-100 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg px-2 py-0.5 focus:outline-none transition">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Table -->
+            <div class="overflow-x-auto pt-0.5 border border-slate-300 rounded-xl overflow-hidden">
+                <table class="w-full text-left border-collapse min-w-[600px] print-bordered-table">
+                    <thead>
+                        <tr class="bg-emerald-700 text-white text-[10px] uppercase tracking-wider" style="background-color: #047857 !important; -webkit-print-color-adjust: exact;">
+                            <th class="py-1 px-2.5 w-12 text-center text-white font-bold border-r border-slate-300">NO.</th>
+                            <th class="py-1 px-2.5 text-white font-bold border-r border-slate-300">DESCRIPTION</th>
+                            <th class="py-1 px-2.5 w-20 text-center text-white font-bold border-r border-slate-300">QTY</th>
+                            <th class="py-1 px-2.5 w-32 text-right text-white font-bold border-r border-slate-300">UNIT PRICE</th>
+                            <th class="py-1 px-2.5 w-36 text-right text-white font-bold">AMOUNT</th>
+                            <th class="py-1 px-2 w-10 no-print"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-container" class="divide-y divide-slate-300 text-xs font-medium">
+                        <!-- Dynamic items -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary & Totals -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 border-t border-slate-200">
+                <!-- Notes & Word Amount -->
+                <div class="space-y-1">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-2">
+                        <span class="block text-[8.5px] font-bold text-slate-600 uppercase tracking-wider mb-0.5">AMOUNT IN WORDS:</span>
+                        <input type="text" id="amount-in-words" value="Five Thousand Nine Hundred Forty USD Only" oninput="this.setAttribute('value', this.value)" class="unified-text w-full bg-transparent font-bold text-slate-900 focus:outline-none">
+                    </div>
+
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="bg-slate-100 px-3 py-0.5 font-bold text-[8.5px] uppercase tracking-wider text-slate-700 border-b border-slate-200">NOTES:</div>
+                        <div class="p-2 bg-white unified-text space-y-0.5 text-slate-700 font-medium text-[10px]">
+                            <p>1. Please make payment within 15 days of invoice date.</p>
+                            <p>2. Payment can be made by Bank Transfer / ABA / Cash.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Totals Calculation Box -->
+                <div class="space-y-1 unified-text">
+                    <div class="flex justify-between items-center py-1 px-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="font-semibold text-slate-700">Sub Total</span>
+                        <span id="subtotal" class="font-bold text-slate-900">$ 5,400.00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 px-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-semibold text-slate-700">Discount (</span>
+                            <input type="number" id="discount-percent" value="0" oninput="this.setAttribute('value', this.value); calculateTotals()" class="unified-text w-10 text-center bg-white border border-slate-300 rounded px-1 py-0.5 font-bold text-slate-900 focus:outline-none focus:border-emerald-500">
+                            <span class="font-semibold text-slate-700">%)</span>
+                        </div>
+                        <span id="discount-amount" class="font-bold text-slate-900">$ 0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 px-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="font-semibold text-slate-700">Taxable Amount</span>
+                        <span id="taxable-amount" class="font-bold text-slate-900">$ 5,400.00</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 px-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-semibold text-slate-700">GST / VAT (</span>
+                            <input type="number" id="tax-percent" value="10" oninput="this.setAttribute('value', this.value); calculateTotals()" class="unified-text w-10 text-center bg-white border border-slate-300 rounded px-1 py-0.5 font-bold text-slate-900 focus:outline-none focus:border-emerald-500">
+                            <span class="font-semibold text-slate-700">%)</span>
+                        </div>
+                        <span id="tax-amount" class="font-bold text-slate-900">$ 540.00</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center py-1.5 px-3 bg-emerald-700 text-white rounded-xl font-black text-sm shadow-sm" style="background-color: #047857 !important; -webkit-print-color-adjust: exact;">
+                        <span>TOTAL AMOUNT</span>
+                        <span id="grand-total">$ 5,940.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUTHORIZED SIGNATURE SECTION -->
+            <div class="pt-1.5 border-t border-slate-200 signature-section">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
+                    
+                    <!-- Receiver Signature -->
+                    <div class="flex flex-col justify-end text-center space-y-1">
+                        <div class="h-10 border-b-2 border-slate-300 border-dashed flex items-end justify-center pb-1">
+                            <span class="unified-text text-[9.5px] text-slate-400 no-print italic">(Sign here upon delivery)</span>
+                        </div>
+                        <div>
+                            <input type="text" value="Customer / Receiver Signature" oninput="this.setAttribute('value', this.value)" class="unified-text w-full text-center font-bold text-slate-800 bg-transparent focus:outline-none text-[10.5px]">
+                            <input type="text" value="Date: ____ / ____ / ________" oninput="this.setAttribute('value', this.value)" class="unified-text w-full text-center text-slate-500 bg-transparent focus:outline-none text-[9.5px]">
+                        </div>
+                    </div>
+
+                    <!-- Company Signature Pad & Stamp -->
+                    <div class="flex flex-col justify-end text-center space-y-1">
+                        <div class="relative bg-slate-50/60 border border-slate-200 rounded-lg p-1.5 flex flex-col items-center justify-center min-h-[75px]">
+                            
+                            <div id="canvas-container" class="relative w-full h-12 flex items-center justify-center overflow-hidden">
+                                <canvas id="sig-canvas" width="340" height="42" class="border border-dashed border-slate-300 bg-white rounded cursor-crosshair touch-none w-full h-full object-contain"></canvas>
+                                <img id="sig-print-img" class="hidden max-h-12 object-contain mx-auto">
+                                <img id="stamp-img" class="hidden max-h-12 object-contain mx-auto">
+                            </div>
+
+                            <div class="no-print flex flex-wrap items-center justify-center gap-1.5 mt-0.5">
+                                <button type="button" onclick="clearCanvas()" class="text-[9.5px] text-slate-600 hover:text-red-600 bg-white border border-slate-200 hover:border-red-200 px-1 py-0.5 rounded transition font-medium">
+                                    Clear
+                                </button>
+                                <label class="text-[9.5px] text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-1 py-0.5 rounded cursor-pointer transition font-medium">
+                                    Upload Stamp/Sig
+                                    <input type="file" accept="image/*" onchange="uploadStamp(event)" class="hidden">
+                                </label>
+                                <button type="button" id="toggle-draw-btn" onclick="resetToPad()" class="hidden text-[9.5px] text-slate-600 bg-white border border-slate-200 px-1 py-0.5 rounded transition font-medium">
+                                    Use Pad
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="border-t-2 border-slate-900 pt-0.5">
+                                <input type="text" value="Authorized Signature & Stamp" oninput="this.setAttribute('value', this.value)" class="unified-text w-full text-center font-bold text-slate-900 bg-transparent focus:outline-none text-[10.5px]">
+                                <input type="text" value="ART ARENA ENTERTAINMENT" oninput="this.setAttribute('value', this.value)" class="unified-text w-full text-center text-emerald-800 font-bold bg-transparent focus:outline-none text-[9.5px]">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-slate-50 border-t border-slate-200 py-1 px-6 text-center unified-text text-slate-500 flex justify-between items-center no-print font-medium text-[10px]">
+            <span>Create Smart Invoices Instantly</span>
+            <span class="font-bold text-emerald-700">Stay Professional • Get Paid Faster</span>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        lucide.createIcons();
+
+        let currentSymbol = '$';
+
+        let items = [
+            { desc: "ហិរញ្ញប្បទានសែសិបលានដុល្លារ", qty: 1, price: 900.00 },
+            { desc: "ភ្នំអង្គរ", qty: 1, price: 900.00 },
+            { desc: "សារយុទ្ធសាស្ត្រ", qty: 1, price: 900.00 },
+            { desc: "កសិផលចលនាតជាតិ", qty: 1, price: 900.00 },
+            { desc: "ស្រូវសរីរាង្គខេត្តព្រះវិហារ", qty: 1, price: 900.00 },
+            { desc: "ស្រូវសៀងក្រហម", qty: 1, price: 900.00 }
+        ];
+
+        function changeCurrency(symbol) {
+            currentSymbol = symbol;
+            renderItems();
+        }
+
+        function formatCurrency(val) {
+            return currentSymbol + " " + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function renderItems() {
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+            
+            items.forEach((item, index) => {
+                const amount = (item.qty * item.price) || 0;
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50/80 transition";
+                row.innerHTML = `
+                    <td class="py-1.5 px-2.5 text-center font-semibold text-slate-500 unified-text border-r border-slate-300">${index + 1}</td>
+                    <td class="py-1.5 px-2.5 border-r border-slate-300">
+                        <input type="text" value="${item.desc}" oninput="updateItem(${index}, 'desc', this.value)" class="item-input w-full bg-transparent focus:bg-white border border-transparent focus:border-emerald-500 rounded px-2 py-1 focus:outline-none text-slate-900" placeholder="Item description">
+                    </td>
+                    <td class="py-1.5 px-2.5 text-center border-r border-slate-300">
+                        <input type="number" value="${item.qty}" min="0" oninput="updateItem(${index}, 'qty', this.value)" class="unified-text w-16 text-center bg-slate-50 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg py-1 font-bold text-slate-900 focus:outline-none">
+                    </td>
+                    <td class="py-1.5 px-2.5 text-right border-r border-slate-300">
+                        <input type="number" value="${item.price}" step="any" oninput="updateItem(${index}, 'price', this.value)" class="unified-text w-28 text-center sm:text-right bg-slate-50 focus:bg-white border border-slate-200 focus:border-emerald-500 rounded-lg py-1 px-2 font-bold text-slate-900 focus:outline-none" placeholder="0.00">
+                    </td>
+                    <td class="py-1.5 px-2.5 text-right font-black text-slate-900 item-amount unified-text">
+                        ${formatCurrency(amount)}
+                    </td>
+                    <td class="py-1.5 px-2 text-center no-print">
+                        <button onclick="removeItem(${index})" class="text-slate-400 hover:text-red-500 transition p-1 rounded" title="Remove row">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                container.appendChild(row);
+            });
+            lucide.createIcons();
+            calculateTotals();
+        }
+
+        function addItem() {
+            items.push({ desc: "", qty: 1, price: 0.00 });
+            renderItems();
+        }
+
+        function removeItem(index) {
+            items.splice(index, 1);
+            renderItems();
+        }
+
+        function updateItem(index, field, value) {
+            if (field === 'qty' || field === 'price') {
+                items[index][field] = parseFloat(value) || 0;
+            } else {
+                items[index][field] = value;
+            }
+            
+            calculateTotals();
+            
+            const container = document.getElementById('items-container');
+            if (container.children[index]) {
+                const amountCell = container.children[index].querySelector('.item-amount');
+                const amt = (items[index].qty * items[index].price) || 0;
+                amountCell.innerText = formatCurrency(amt);
+            }
+        }
+
+        function calculateTotals() {
+            let subtotal = items.reduce((sum, item) => sum + ((item.qty || 0) * (item.price || 0)), 0);
+            
+            const discountPercent = parseFloat(document.getElementById('discount-percent').value) || 0;
+            const discountAmount = (subtotal * discountPercent) / 100;
+            
+            const taxableAmount = subtotal - discountAmount;
+            
+            const taxPercent = parseFloat(document.getElementById('tax-percent').value) / 100 || 0;
+            const taxAmount = taxableAmount * taxPercent;
+            
+            const grandTotal = taxableAmount + taxAmount;
+
+            document.getElementById('subtotal').innerText = formatCurrency(subtotal);
+            document.getElementById('discount-amount').innerText = formatCurrency(discountAmount);
+            document.getElementById('taxable-amount').innerText = formatCurrency(taxableAmount);
+            document.getElementById('tax-amount').innerText = formatCurrency(taxAmount);
+            document.getElementById('grand-total').innerText = formatCurrency(grandTotal);
+        }
+
+        function syncTextarea(el) {
+            el.innerText = el.value;
+        }
+
+        let canvas, ctx, isDrawing = false;
+
+        function initSignaturePad() {
+            canvas = document.getElementById('sig-canvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 2;
+            ctx.lineCap = "round";
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: (clientX - rect.left) * (canvas.width / rect.width),
+                    y: (clientY - rect.top) * (canvas.height / rect.height)
+                };
+            }
+
+            function startDraw(e) {
+                isDrawing = true;
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                const pos = getPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            }
+
+            function stopDraw() {
+                if (isDrawing) {
+                    isDrawing = false;
+                    const sigPrintImg = document.getElementById('sig-print-img');
+                    if (sigPrintImg) {
+                        sigPrintImg.src = canvas.toDataURL();
+                    }
+                }
+            }
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            window.addEventListener('mouseup', stopDraw);
+
+            canvas.addEventListener('touchstart', startDraw, { passive: true });
+            canvas.addEventListener('touchmove', draw, { passive: true });
+            canvas.addEventListener('touchend', stopDraw);
+        }
+
+        function clearCanvas() {
+            if (ctx && canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const sigPrintImg = document.getElementById('sig-print-img');
+                if (sigPrintImg) sigPrintImg.src = '';
+            }
+        }
+
+        function uploadStamp(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('stamp-img');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    canvas.classList.add('hidden');
+                    document.getElementById('toggle-draw-btn').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function resetToPad() {
+            document.getElementById('stamp-img').classList.add('hidden');
+            canvas.classList.remove('hidden');
+            document.getElementById('toggle-draw-btn').classList.add('hidden');
+        }
+
+        function triggerDirectPrint() {
+            if (canvas) {
+                const sigPrintImg = document.getElementById('sig-print-img');
+                if (sigPrintImg && !document.getElementById('stamp-img').src) {
+                    sigPrintImg.src = canvas.toDataURL();
+                }
+            }
+            window.print();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderItems();
+            initSignaturePad();
+        });
+    </script>
+</body>
+</html>
