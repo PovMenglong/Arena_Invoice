@@ -60,7 +60,7 @@
             padding-bottom: 0.3rem !important;
         }
 
-        /* PRINT STYLES - A5 PORTRAIT SINGLE PAGE WITH PERFECT EQUALITY & BIGGER LOGO */
+        /* PRINT STYLES - A5 PORTRAIT SINGLE PAGE WITH PERFECT EQUALITY & PERSISTENT LOGO */
         @media print {
             @page {
                 size: A5 portrait;
@@ -208,7 +208,7 @@
             <div class="flex items-center gap-3.5">
                 <!-- Bigger Logo Container -->
                 <div class="relative group flex-shrink-0">
-                    <img id="header-logo" src="Logo Posterថ្មី-01.jpg" alt="Art Arena Logo" class="h-12 sm:h-14 w-auto object-contain rounded bg-white/10 p-1 border border-emerald-500/40 shadow-sm" onerror="this.style.display='none'; document.getElementById('logo-placeholder').style.display='flex';">
+                    <img id="header-logo" src="Logo ថ្មី Profile-01.jpg" alt="Art Arena Logo" class="h-12 sm:h-14 w-auto object-contain rounded bg-white p-1 border border-emerald-500/40 shadow-sm" onerror="handleLogoError()">
                     <div id="logo-placeholder" class="hidden h-12 w-12 sm:h-14 sm:w-14 bg-emerald-900/60 rounded border border-emerald-600/50 items-center justify-center text-[9px] text-emerald-200 font-bold text-center">
                         NO LOGO
                     </div>
@@ -444,6 +444,40 @@
             { desc: "ស្រូវសៀងក្រហម", qty: 1, price: 900.00 }
         ];
 
+        function loadSavedLogo() {
+            const savedLogo = localStorage.getItem('saved_header_logo');
+            const img = document.getElementById('header-logo');
+            if (savedLogo) {
+                img.src = savedLogo;
+                img.style.display = 'block';
+                document.getElementById('logo-placeholder').style.display = 'none';
+            }
+        }
+
+        function uploadLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('header-logo');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('logo-placeholder').style.display = 'none';
+                    // Save logo to local storage to persist across page refreshes
+                    localStorage.setItem('saved_header_logo', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function handleLogoError() {
+            const savedLogo = localStorage.getItem('saved_header_logo');
+            if (!savedLogo) {
+                document.getElementById('header-logo').style.display = 'none';
+                document.getElementById('logo-placeholder').style.display = 'flex';
+            }
+        }
+
         function changeCurrency(symbol) {
             currentSymbol = symbol;
             renderItems();
@@ -536,20 +570,6 @@
 
         function syncTextarea(el) {
             el.innerText = el.value;
-        }
-
-        function uploadLogo(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.getElementById('header-logo');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    document.getElementById('logo-placeholder').style.display = 'none';
-                };
-                reader.readAsDataURL(file);
-            }
         }
 
         let canvas, ctx, isDrawing = false;
@@ -646,6 +666,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            loadSavedLogo();
             renderItems();
             initSignaturePad();
         });
