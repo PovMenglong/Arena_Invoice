@@ -60,30 +60,27 @@
             padding-bottom: 0.3rem !important;
         }
 
-        /* Base page setup */
-          html, body {
-            margin: 0;
-            padding: 0;
-            background-color: #fff;
-          }
-
         /* PRINT STYLES - Guaranteed single A4 page layout with zero overflow */
         @media print {
             /* 1. Set paper size specifically to A5 Portrait with clean margins */
                 @page {
                   size: A5 portrait;
-                  margin: 5mm; /* Minimal margins to fit everything on one page */
+                  margin: 4mm; /* Minimal margins to fit everything on one page */
+                }
+                * {
+                  -webkit-print-color-adjust: exact !important;
+                  print-color-adjust: exact !important;
+                  color-adjust: exact !important;
                 }
             
                 /* 2. Force body to fill A5 dimensions without creating page 2 */
                 html, body {
-                  width: 148mm !important;
-                  height: 210mm !important;
-                  max-height: 210mm !important;
-                  overflow: hidden !important; /* Prevents 2nd blank/overflow page */
+                  width: 100% !important;
+                  height: 100% !important;
+                  max-height: 205mm !important;
+                  overflow: hidden !important;
                   background: #ffffff !important;
-                  -webkit-print-color-adjust: exact !important; /* Retains green headers on iOS/Android */
-                  print-color-adjust: exact !important;
+                  font-family: 'Plus Jakarta Sans', 'Khmer OS Siemreap', sans-serif !important;
                 }
             
                 /* 3. Scale the main container to fit standard A5 proportions */
@@ -114,22 +111,19 @@
                 }
             
                 th, td {
-                  padding: 3px 5px !important;
+                  padding: 2px 4px !important;
                 }
             
                 /* Hide any screen-only elements like print buttons */
-                .no-print, button, .btn {
+                .no-print, header, .top-bar, .action-buttons, button.print-btn, .delete-btn {
                   display: none !important;
                 }
-            textarea, input, select {
-                border-color: transparent !important;
-                background: transparent !important;
-                resize: none !important;
-                box-shadow: none !important;
-                outline: none !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-            }
+                input, textarea, select {
+                  border: 1px solid #d1d5db !important;
+                  background: #ffffff !important;
+                  appearance: none !important;
+                  -webkit-appearance: none !important;
+                }
             .print-bordered-table, .print-bordered-table th, .print-bordered-table td {
                 border: 1px solid #cbd5e1 !important;
             }
