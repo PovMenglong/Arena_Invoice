@@ -62,68 +62,41 @@
 
         /* PRINT STYLES - Guaranteed single A4 page layout with zero overflow */
         @media print {
-            /* 1. Set paper size specifically to A5 Portrait with clean margins */
-                @page {
-                  size: A5 portrait;
-                  margin: 4mm; /* Minimal margins to fit everything on one page */
-                }
-                * {
-                  -webkit-print-color-adjust: exact !important;
-                  print-color-adjust: exact !important;
-                  color-adjust: exact !important;
-                }
-            
-                /* 2. Force body to fill A5 dimensions without creating page 2 */
-                html, body {
-                  width: 100% !important;
-                  height: 100% !important;
-                  max-height: 205mm !important;
-                  overflow: hidden !important;
-                  background: #ffffff !important;
-                  font-family: 'Plus Jakarta Sans', 'Khmer OS Siemreap', sans-serif !important;
-                }
-            
-                /* 3. Scale the main container to fit standard A5 proportions */
-                .invoice-card, 
-                .container, 
-                #invoice {
-                  width: 100% !important;
-                  max-width: 100% !important;
-                  margin: 0 auto !important;
-                  padding: 4px !important;
-                  box-shadow: none !important;
-                  border: none !important;
-                  box-sizing: border-box !important;
-                  page-break-inside: avoid !important;
-                  break-inside: avoid !important;
-                }
-            
-                /* 4. Ensure tables and rows don't push into page 2 */
-                table, tr, td, th, div {
-                  page-break-inside: avoid !important;
-                  break-inside: avoid !important;
-                }
-            
-                /* 5. Slightly adjust font & padding sizes so tight A5 fits comfortably */
-                body {
-                  font-size: 8.5pt !important;
-                  line-height: 1.2 !important;
-                }
-            
-                th, td {
-                  padding: 2px 4px !important;
-                }
-            
-                /* Hide any screen-only elements like print buttons */
-                .no-print, header, .top-bar, .action-buttons, button.print-btn, .delete-btn {
-                  display: none !important;
-                }
-                input, textarea, select {
-                  border: 1px solid #d1d5db !important;
-                  background: #ffffff !important;
-                  appearance: none !important;
-                  -webkit-appearance: none !important;
-                }
+            @page {
+                size: A4 portrait;
+                margin: 3mm;
+            }
+            html, body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .invoice-box {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                border-radius: 0 !important;
+                page-break-inside: avoid !important;
+            }
+            textarea, input, select {
+                border-color: transparent !important;
+                background: transparent !important;
+                resize: none !important;
+                box-shadow: none !important;
+                outline: none !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
             .print-bordered-table, .print-bordered-table th, .print-bordered-table td {
                 border: 1px solid #cbd5e1 !important;
             }
