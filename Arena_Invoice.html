@@ -62,32 +62,32 @@
 
         /* PRINT STYLES - Guaranteed single A4 page layout with zero overflow */
         @media print {
-            @page {
+            /* Lock page dimensions to standard A4/Letter size */
+              @page {
                 size: A4 portrait;
-                margin: 3mm;
-            }
-            html, body {
-                background: white !important;
-                padding: 0 !important;
-                margin: 0 !important;
+                margin: 10mm; /* adjust margins as needed */
+              }
+            
+              body {
                 width: 100% !important;
-                height: 100% !important;
-                -webkit-print-color-adjust: exact !important;
+                min-width: 800px !important; /* Forces mobile print engine to render desktop layout */
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                font-size: 12pt !important;
+                -webkit-print-color-adjust: exact !important; /* Preserves colors/backgrounds on mobile iOS/Android */
                 print-color-adjust: exact !important;
-            }
-            .no-print {
+              }
+            
+              /* Prevent page breaks inside critical elements like total rows or signatures */
+              .invoice-box, table, tr, td, .totals {
+                page-break-inside: avoid;
+              }
+            
+              /* Hide print buttons or non-printable controls on mobile */
+              .no-print, button, .print-btn {
                 display: none !important;
-            }
-            .invoice-box {
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                max-width: 100% !important;
-                width: 100% !important;
-                border-radius: 0 !important;
-                page-break-inside: avoid !important;
-            }
+              }
             textarea, input, select {
                 border-color: transparent !important;
                 background: transparent !important;
