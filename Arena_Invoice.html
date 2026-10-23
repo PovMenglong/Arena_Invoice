@@ -60,7 +60,7 @@
             padding-bottom: 0.3rem !important;
         }
 
-        /* PRINT STYLES - A5 PORTRAIT SINGLE PAGE WITH PERFECT EQUALITY & PERSISTENT LOGO */
+        /* PRINT STYLES - A5 PORTRAIT SINGLE PAGE WITH CLEAN MOBILE KHMER FONT RENDERING */
         @media print {
             @page {
                 size: A5 portrait;
@@ -91,13 +91,22 @@
                 box-sizing: border-box !important;
             }
             
-            /* Generous line-height for Khmer stacked vowels/subscripts preventing top/bottom clipping */
+            /* Fix mobile bold Khmer font distortion by normalizing weights and improving line height */
+            .unified-text, input.item-input, textarea.fixed-2line-address, span, p, div {
+                font-weight: 500 !important;
+                -webkit-font-smoothing: antialiased;
+            }
+            .font-bold, .font-black, th {
+                font-weight: 600 !important;
+            }
+
             .unified-text {
                 font-size: 0.52rem !important;
                 line-height: 1.55 !important;
             }
             input.item-input {
                 font-size: 0.55rem !important;
+                font-weight: 500 !important;
                 padding-top: 0.12rem !important;
                 padding-bottom: 0.12rem !important;
                 line-height: 1.55 !important;
@@ -463,7 +472,6 @@
                     img.src = e.target.result;
                     img.style.display = 'block';
                     document.getElementById('logo-placeholder').style.display = 'none';
-                    // Save logo to local storage to persist across page refreshes
                     localStorage.setItem('saved_header_logo', e.target.result);
                 };
                 reader.readAsDataURL(file);
